@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
-    "test": "tape -r @babel/register libs/**/*.test.js | tap-spec"
+    "test": "tape -r @babel/register tests/**/*.test.js | tap-spec"
   },
   "keywords": [
     "debugging",
