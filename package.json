@@ -1,0 +1,34 @@
+{
+  "name": "@wigxel/utils",
+  "version": "1.0.0",
+  "description": "Utilities for coding by wigxel",
+  "main": "index.js",
+  "scripts": {
+    "build": "rollup -c",
+    "test": "tape -r @babel/register libs/**/*.test.js | tap-spec"
+  },
+  "keywords": [
+    "debugging",
+    "helpers"
+  ],
+  "files": [
+    "libs/*.js",
+    "index.js"
+  ],
+  "author": "Joseph Julius Owonvwon",
+  "license": "MIT",
+  "dependencies": {
+    "rollup": "^1.24.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.4",
+    "@babel/plugin-proposal-export-namespace-from": "^7.5.2",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/register": "^7.6.2",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "tap-spec": "^5.0.0",
+    "tape": "^4.11.0"
+  }
+}
