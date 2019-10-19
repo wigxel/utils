@@ -234,7 +234,7 @@ var trace = function trace() {
   return function (x) {
     if (isDevelopment()) {
       // eslint-disable-next-line
-      console.info("%c".concat(info, "%c").concat(x), style);
+      console.info("%c".concat(info), style, x);
     }
 
     return x;
@@ -242,6 +242,24 @@ var trace = function trace() {
 };
 var log = function log(x, msg) {
   return trace(msg)(x);
+};
+var startStop = function startStop() {
+  var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'HPION';
+  console.time(name);
+  var count = 0;
+
+  var reset = function reset() {
+    return count = 0;
+  };
+
+  return [function () {
+    count += 1;
+  }, function () {
+    console.timeEnd(name);
+    var countBeforeReset = count;
+    reset();
+    return countBeforeReset;
+  }];
 };
 
 var buildFromProto = function buildFromProto(proto, obj) {
@@ -343,6 +361,7 @@ exports.onBackspace = onBackspace;
 exports.onEnter = onEnter;
 exports.poll = poll;
 exports.slugify = slugify;
+exports.startStop = startStop;
 exports.sumArray = sumArray;
 exports.trace = trace;
 exports.usd = usd;

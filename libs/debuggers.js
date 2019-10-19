@@ -23,7 +23,7 @@ export const debug = a => {
 export const trace = (info = '', style = cStyle) => x => {
   if (isDevelopment()) {
   // eslint-disable-next-line
-    console.info(`%c${info}%c${x}`, style);   
+    console.info(`%c${info}`, style, x);   
   }
   return x;
 };
@@ -36,3 +36,23 @@ export default {
   debug,
   logError
 }
+
+export const startStop = (name = 'HPION') => {
+  console.time(name);
+  let count = 0;
+  const reset = () => (count = 0)
+
+  return [
+    () => {
+      count += 1;
+    },
+    () => {
+      console.timeEnd(name);
+      let countBeforeReset = count;
+      reset();
+      
+      return countBeforeReset
+    }
+  ];
+};
+
