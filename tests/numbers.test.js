@@ -6,7 +6,7 @@ test("formats as expected", (t) => {
   const numberWithDecimal = "1200.23";
   t.equal(typeof naira, "function", "naira is a function");
   t.deepEqual(naira("1250"), naira("1250"), "naira is a pure function with integer");
-  t.notDeepEqual(naira("1250"), naira("1250"), "naira is a pure function with integer");
+  t.notDeepEqual(naira("120"), naira("1250"), "naira is a pure function with integer");
   t.deepEqual(
     naira(numberWithDecimal), 
     naira(numberWithDecimal),

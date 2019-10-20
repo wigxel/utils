@@ -35,3 +35,5 @@ export const filterKeys = (object = {}, keys = [], negate = false) => {
 export const isImage = (mimeType = '') => {
   return /image\/(jpeg|png|jpg)/g.test(mimeType);
 }
+
+export const hasProp = (obj, a) => Object.hasOwnProperty.call(obj, a);
