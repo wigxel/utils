@@ -147,6 +147,9 @@ var isImage = function isImage() {
   var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
   return /image\/(jpeg|png|jpg)/g.test(mimeType);
 };
+var isEmail = function isEmail(email) {
+  return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
+};
 var hasProp = function hasProp(obj, a) {
   return Object.hasOwnProperty.call(obj, a);
 };
@@ -378,6 +381,7 @@ exports.euro = euro;
 exports.filterKeys = filterKeys;
 exports.hasPrice = hasPrice;
 exports.hasProp = hasProp;
+exports.isEmail = isEmail;
 exports.isImage = isImage;
 exports.log = log;
 exports.logError = logError;
