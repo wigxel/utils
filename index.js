@@ -147,6 +147,9 @@ var isImage = function isImage() {
   var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
   return /image\/(jpeg|png|jpg)/g.test(mimeType);
 };
+var hasProp = function hasProp(obj, a) {
+  return Object.hasOwnProperty.call(obj, a);
+};
 
 var pageMeta = function pageMeta(_ref) {
   var currentPage = _ref.currentPage,
@@ -295,15 +298,38 @@ var Editable = function Editable(data) {
   });
 };
 
+var forEvent = function forEvent(evt, fn, event_whitelist) {
+  if (evt !== null && hasProp(evt, 'type')) {
+    if (event_whitelist.includes(evt.type)) {
+      fn(evt);
+    } else if (hasProp(evt, 'keyCode')) {
+      throw Error('Function only works on these events [' + event_whitelist.join(',') + ']');
+    }
+  } else {
+    throw Error('Invalid event passed');
+  }
+};
+
+var keyboard = function keyboard(fn) {
+  return function (evt) {
+    return forEvent(evt, fn, ['keypress', 'keydown', 'keyup']);
+  };
+};
 /**
  * triggers callback function when the Enter key is pressed
  * @param {Function} fn the callback function
  * @returns Function
  */
+
+
 var onEnter = function onEnter(fn) {
-  return function (evt) {
-    if (evt.keyCode === 13) fn(evt);
-  };
+  return keyboard(function (evt) {
+    if (!(fn instanceof Function)) throw Error('first argument should be of type `function`');
+
+    if (evt.keyCode === 13) {
+      fn(evt);
+    }
+  });
 };
 /**
  * triggers callback function when the Enter key is pressed
@@ -351,6 +377,7 @@ exports.debug = debug;
 exports.euro = euro;
 exports.filterKeys = filterKeys;
 exports.hasPrice = hasPrice;
+exports.hasProp = hasProp;
 exports.isImage = isImage;
 exports.log = log;
 exports.logError = logError;
