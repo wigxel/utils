@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
-    "test": "NODE_ENV=development tape-watch -1 -r @babel/register tests/**/*.js -p tap-spec",
-    "test:watch": "npm run test -- --watch"
+    "test": "tape-watch -1 -r @babel/register tests/**/*.js -p tap-spec",
+    "test:watch": "NODE_ENV=development npm run test -- --watch"
   },
   "keywords": [
     "debugging",
