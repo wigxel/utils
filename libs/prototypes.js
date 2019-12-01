@@ -36,9 +36,10 @@ const doToggle = (prop) => function doToggle() {
   this[prop] = !this[prop];
 }
 
-export const Visible = checkDefault(data => ({
-  ...data,
+export const Visibility = checkDefault(data => ({
   visible: true,
+  toggleVisibility: doToggle('visible'),
+  ...data,
 }));
 
 /**
@@ -63,7 +64,7 @@ export const hasPrice = pipe(notNull, onlyObject, checkForPrice, data => ({
     return _.round(
       _.toNumber(this.getPrice()), 
       precision
-      );
+    );
   },
   getFormattedPrice(precision) {    
     return numberFormat(this._getPrice(precision));

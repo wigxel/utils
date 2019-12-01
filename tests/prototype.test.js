@@ -1,5 +1,5 @@
 import test from 'tape'
-import { buildFromProto, Editable, Checkable, hasPrice } from '../libs/prototypes';
+import { buildFromProto, Editable, Checkable, hasPrice, Visibility } from '../libs/prototypes';
 import { trace, log } from '../libs/debuggers';
 import { hasProp } from '../libs/helpers';
  
@@ -39,6 +39,17 @@ test('Edit interface works', (t) => {
 
   t.end();
 })
+
+test("Visibility interface", t => {
+  const item = Visibility({ name: "Carrot", visible: false });
+  t.equal(item.visible, false, "Overwrites the default (false)");
+  item.toggleVisibility()
+  t.equal(item.visible, true, "Toggle works");
+  t.equal(Visibility({}).visible, true, "is false by default");
+  t.throws(() => Visibility(null), "data is not null"); 
+
+  t.end();
+});
 
 test("Check interface works", t => {
   const item = Checkable({ name: "Carrot", checked: true });
