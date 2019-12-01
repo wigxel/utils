@@ -23,7 +23,11 @@ export const debug = a => {
 export const trace = (info = '', style = cStyle) => x => {
   if (isDevelopment()) {
   // eslint-disable-next-line
-    console.info(`%c${info}`, style, x);   
+    if (process.browser) {
+      console.info(`%c${info}`, style, x);   
+    } else {
+      console.info(info, x);
+    }
   }
   return x;
 };
