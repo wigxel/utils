@@ -36,4 +36,14 @@ export const isImage = (mimeType = '') => {
   return /image\/(jpeg|png|jpg)/g.test(mimeType);
 }
 
+export const isEmail = (email) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
+
 export const hasProp = (obj, a) => Object.hasOwnProperty.call(obj, a);
+
+export const compose = (...args) => x => args.reduceRight((a, fn) => {
+  return fn(a);
+}, x);
+
+export const pipe = (...args) => x => args.reduce((a, fn) => {
+  return fn(a);
+}, x);

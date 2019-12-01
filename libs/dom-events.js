@@ -1,12 +1,11 @@
 import { log } from './debuggers.js';
 import { hasProp } from './helpers.js';
 
-
 const forEvent = (evt, fn, event_whitelist) => {
 	if (evt !== null && hasProp(evt, 'type')) {
 		if (event_whitelist.includes(evt.type)) {
 			fn(evt);
-		} else if (hasProp(evt, 'keyCode')) {
+		} else {
   		throw Error('Function only works on these events [' + event_whitelist.join(',') + ']');
 		}
 	} else {

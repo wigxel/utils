@@ -31,5 +31,11 @@ test('The onEnter function', (t) => {
 		'Throws error when invalid event is passed.'		
 	)
 
+	t.throws(
+		() => onEnter(() => {})(click),
+		/works on these events/gi,
+		'Throws error when no a keyboard event',
+	)
+
 	t.end();
 })
