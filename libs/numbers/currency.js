@@ -1,13 +1,13 @@
-import { NumberFormat } from 'intl';
+global.Intl = require("intl");
 
 const defaultConfig = {
   style: 'currency',
   currencyDisplay: 'symbol',
   maximumFractionDigits: 2
 };
-
+ 
 export const currency = (lang = 'en-US') => (config = {}) =>
-  new NumberFormat(lang, { ...defaultConfig, ...config }).format;
+  new Intl.NumberFormat(lang, { ...defaultConfig, ...config }).format;
 
 export const numberFormat = currency('en-US')({
   style: 'decimal'

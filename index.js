@@ -153,6 +153,28 @@ var isEmail = function isEmail(email) {
 var hasProp = function hasProp(obj, a) {
   return Object.hasOwnProperty.call(obj, a);
 };
+var compose = function compose() {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  return function (x) {
+    return args.reduceRight(function (a, fn) {
+      return fn(a);
+    }, x);
+  };
+};
+var pipe = function pipe() {
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
+
+  return function (x) {
+    return args.reduce(function (a, fn) {
+      return fn(a);
+    }, x);
+  };
+};
 
 var pageMeta = function pageMeta(_ref) {
   var currentPage = _ref.currentPage,
@@ -240,7 +262,11 @@ var trace = function trace() {
   return function (x) {
     if (isDevelopment()) {
       // eslint-disable-next-line
-      console.info("%c".concat(info), style, x);
+      if (process.browser) {
+        console.info("%c".concat(info), style, x);
+      } else {
+        console.info(info, x);
+      }
     }
 
     return x;
@@ -268,38 +294,113 @@ var startStop = function startStop() {
   }];
 };
 
+global.Intl = require("intl");
+var defaultConfig = {
+  style: 'currency',
+  currencyDisplay: 'symbol',
+  maximumFractionDigits: 2
+};
+var currency = function currency() {
+  var lang = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'en-US';
+  return function () {
+    var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    return new Intl.NumberFormat(lang, _objectSpread2({}, defaultConfig, {}, config)).format;
+  };
+};
+var numberFormat = currency('en-US')({
+  style: 'decimal'
+});
+var usd = currency('en-US')({
+  currency: 'USD'
+});
+var euro = currency('en-US')({
+  currency: 'EUR'
+});
+var naira = currency('en-US')({
+  currency: 'NGN'
+});
+
+var ProtoBuilderError = function ProtoBuilderError(msg) {
+  return new Error("ProtoBuildError: " + msg);
+};
+
+var throwIf = function throwIf(validate) {
+  var name = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "ProtoBuilder";
+  return function (a) {
+    if (validate(a)) {
+      throw ProtoBuilderError("Invalid argument provided.\n      Checker: ".concat(name, "\n      Value: ").concat(a, "\n    "));
+    }
+
+    return a;
+  };
+};
+
+var onlyObject = throwIf(function (a) {
+  return !_.isObject(a);
+}, "Object Checker");
+var notNull = throwIf(function (a) {
+  return _.isNull(a) || _.isUndefined(a);
+}, "Null Checker");
+/**
+ * default type checking functions
+ * @param {Function} cb 
+ * 
+ */
+
+var checkDefault = function checkDefault(cb) {
+  return pipe(notNull, onlyObject, cb);
+};
+
 var buildFromProto = function buildFromProto(proto, obj) {
   return Object.assign(Object.create(proto), obj);
 };
-var Visible = function Visible(data) {
-  return _objectSpread2({}, data, {
-    visible: true
-  });
+
+var doToggle = function doToggle(prop) {
+  return function doToggle() {
+    this[prop] = !this[prop];
+  };
 };
-var hasPrice = function hasPrice(data) {
+
+var Visibility = checkDefault(function (data) {
+  return _objectSpread2({
+    visible: true,
+    toggleVisibility: doToggle('visible')
+  }, data);
+});
+/**
+ * @param {Object} item
+ * @returns 
+ */
+
+var checkForPrice = function checkForPrice(data) {
+  if (!hasProp(data, "getPrice")) throw ProtoBuilderError("HasPrice proto requires a [getPrice] method, none provide");
+  if (!_.isFunction(data.getPrice)) throw ProtoBuilderError('HasPrice requires [getPrice] to be a Function');
+  return data;
+};
+
+var hasPrice = pipe(notNull, onlyObject, checkForPrice, function (data) {
   return _objectSpread2({}, data, {
-    getPrice: function getPrice() {
+    _getPrice: function _getPrice() {
       var precision = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
-      return _.round(parseFloat(this.price.$numberDecimal || this.price), precision);
+      return _.round(_.toNumber(this.getPrice()), precision);
     },
     getFormattedPrice: function getFormattedPrice(precision) {
-      return "&#x20A6; ".concat(this.getPrice(precision));
+      return numberFormat(this._getPrice(precision));
     }
   });
-};
-var Checkable = function Checkable(data) {
-  return _objectSpread2({}, data, {
-    checked: false
-  });
-};
-var Editable = function Editable(data) {
-  return _objectSpread2({}, data, {
+});
+var Checkable = checkDefault(function (data) {
+  return _objectSpread2({
+    checked: false,
+    toggleCheck: doToggle('checked')
+  }, data);
+});
+var Editable = checkDefault(function (data) {
+  return _objectSpread2({
     edit: false,
-    toggleEdit: function toggleEdit() {
-      this.edit = !this.edit;
-    }
-  });
-};
+    toggleEdit: doToggle('edit')
+  }, data);
+});
 
 var forEvent = function forEvent(evt, fn, event_whitelist) {
   if (evt !== null && hasProp(evt, 'type')) {
@@ -346,35 +447,11 @@ var onBackspace = function onBackspace(fn) {
   };
 };
 
-var defaultConfig = {
-  style: 'currency',
-  currencyDisplay: 'symbol',
-  maximumFractionDigits: 2
-};
-var currency = function currency() {
-  var lang = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'en-US';
-  return function () {
-    var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    return new Intl.NumberFormat(lang, _objectSpread2({}, defaultConfig, {}, config)).format;
-  };
-};
-var numberFormat = currency('en-US')({
-  style: 'decimal'
-});
-var usd = currency('en-US')({
-  currency: 'USD'
-});
-var euro = currency('en-US')({
-  currency: 'EUR'
-});
-var naira = currency('en-US')({
-  currency: 'NGN'
-});
-
 exports.Checkable = Checkable;
 exports.Editable = Editable;
-exports.Visible = Visible;
+exports.Visibility = Visibility;
 exports.buildFromProto = buildFromProto;
+exports.compose = compose;
 exports.currency = currency;
 exports.debug = debug;
 exports.euro = euro;
@@ -390,6 +467,7 @@ exports.naira = naira;
 exports.numberFormat = numberFormat;
 exports.onBackspace = onBackspace;
 exports.onEnter = onEnter;
+exports.pipe = pipe;
 exports.poll = poll;
 exports.slugify = slugify;
 exports.startStop = startStop;
