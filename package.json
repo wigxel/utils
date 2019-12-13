@@ -6,7 +6,8 @@
   "scripts": {
     "build": "rollup -c",
     "test": "tape-watch -1 -r @babel/register tests/**/*.js -p tap-spec",
-    "test:watch": "NODE_ENV=development npm run test -- --watch"
+    "test:watch": "NODE_ENV=development npm run test -- --watch",
+    "publish": "npm run build"
   },
   "keywords": [
     "debugging",
