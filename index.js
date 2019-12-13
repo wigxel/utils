@@ -294,7 +294,10 @@ var startStop = function startStop() {
   }];
 };
 
-global.Intl = require("intl");
+require('intl');
+
+require("intl/locale-data/jsonp/en");
+
 var defaultConfig = {
   style: 'currency',
   currencyDisplay: 'symbol',

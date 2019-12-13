@@ -1,4 +1,5 @@
-global.Intl = require("intl");
+require('intl');
+require("intl/locale-data/jsonp/en");
 
 const defaultConfig = {
   style: 'currency',
