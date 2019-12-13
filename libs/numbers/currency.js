@@ -1,3 +1,5 @@
+import { NumberFormat } from 'intl';
+
 const defaultConfig = {
   style: 'currency',
   currencyDisplay: 'symbol',
@@ -5,7 +7,7 @@ const defaultConfig = {
 };
 
 export const currency = (lang = 'en-US') => (config = {}) =>
-  new Intl.NumberFormat(lang, { ...defaultConfig, ...config }).format;
+  new NumberFormat(lang, { ...defaultConfig, ...config }).format;
 
 export const numberFormat = currency('en-US')({
   style: 'decimal'

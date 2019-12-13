@@ -18,7 +18,9 @@
   ],
   "author": "Joseph Julius Owonvwon",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "intl": "^1.2.5"
+  },
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "@babel/plugin-proposal-export-namespace-from": "^7.5.2",

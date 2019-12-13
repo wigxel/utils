@@ -16,7 +16,7 @@ test("formats as expected", (t) => {
     currency("en-US")({ currency: "NGN", currencyDisplay: "name" })(
       numberWithDecimal
     ),
-    "1,200.23 Nigerian nairas",
+    "NGN1,200.23",
     "Naira currency display working"
   )
 });
