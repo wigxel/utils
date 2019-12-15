@@ -175,6 +175,11 @@ var pipe = function pipe() {
     }, x);
   };
 };
+var delay = function delay(duration) {
+  return new Promise(function (res) {
+    setTimeout(res, duration);
+  });
+};
 
 var pageMeta = function pageMeta(_ref) {
   var currentPage = _ref.currentPage,
@@ -457,6 +462,7 @@ exports.buildFromProto = buildFromProto;
 exports.compose = compose;
 exports.currency = currency;
 exports.debug = debug;
+exports.delay = delay;
 exports.euro = euro;
 exports.filterKeys = filterKeys;
 exports.hasPrice = hasPrice;

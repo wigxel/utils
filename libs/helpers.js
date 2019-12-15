@@ -47,3 +47,15 @@ export const compose = (...args) => x => args.reduceRight((a, fn) => {
 export const pipe = (...args) => x => args.reduce((a, fn) => {
   return fn(a);
 }, x);
+
+/**
+ * Delays before running running
+ * e.g await delay(3000)
+ * 
+ * @param {Integer} duration The duration of the delay
+ * 
+ * @return {Promise}  promise resolves after the duration
+ */
+export const delay = duration => new Promise((res) => {
+  setTimeout(res, duration);
+})
