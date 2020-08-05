@@ -4,6 +4,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
+var ramda = require('ramda');
 var _ = _interopDefault(require('lodash'));
 
 var iterate = function iterate(fn) {
@@ -15,6 +16,42 @@ var iterate = function iterate(fn) {
 var sumArray = function sumArray(arr, fn) {
   return arr.reduce(iterate(fn), 0);
 };
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
 
 function _defineProperty(obj, key, value) {
   if (key in obj) {
@@ -107,6 +144,7 @@ function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance");
 }
 
+var isBrowser = new Function("try {return this===window;}catch(e){ return false;}");
 var slugify = function slugify(text) {
   var a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôœṕŕßśșțùúüûǘẃẍÿź·/_,:;';
   var b = 'aaaaaaaaceeeeghiiiimnnnoooooprssstuuuuuwxyz------';
@@ -175,75 +213,19 @@ var pipe = function pipe() {
     }, x);
   };
 };
+/**
+ * Delays before running running
+ * e.g await delay(3000)
+ * 
+ * @param {Integer} duration The duration of the delay
+ * 
+ * @return {Promise}  promise resolves after the duration
+ */
+
 var delay = function delay(duration) {
   return new Promise(function (res) {
     setTimeout(res, duration);
   });
-};
-
-var pageMeta = function pageMeta(_ref) {
-  var currentPage = _ref.currentPage,
-      totalPages = _ref.totalPages;
-  return {
-    totalPages: totalPages,
-    currentPage: currentPage,
-    totalItems: 1,
-    getCurrentPage: function getCurrentPage() {
-      return currentPage || 0;
-    },
-    setCurrentPage: function setCurrentPage(value) {
-      this.currentPage = value;
-    },
-    isBeforeLastPage: function isBeforeLastPage() {
-      return this.currentPage < this.totalPages;
-    },
-    isFirstFetch: function isFirstFetch() {
-      return this.currentPage === 0;
-    },
-    isLastPage: function isLastPage() {
-      return this.currentPage === this.totalPages;
-    }
-  };
-};
-
-var defaultProps = {
-  limit: 30,
-  items: new Map([]),
-  urlParams: {},
-  prefetch: false,
-  isFetching: false,
-  pager: pageMeta({
-    currentPage: 0,
-    totalPages: 1
-  }),
-  getParams: function getParams() {
-    return {
-      limit: this.limit
-    };
-  },
-  setMeta: function setMeta(_ref4) {
-    var tp = _ref4.totalPages,
-        totalItems = _ref4.totalItems;
-    this.pager.totalPages = tp;
-    this.pager.totalItems = totalItems;
-  },
-  onFail: function onFail(x) {
-    return x;
-  },
-  onSuccess: function onSuccess(x) {
-    return x;
-  },
-  metaHandler: function metaHandler(x) {
-    return x;
-  }
-};
-var poll = function poll(getter, setter, duration) {
-  var handle = setInterval(function () {
-    return getter().update().then(setter);
-  }, duration);
-  return function () {
-    clearInterval(handle);
-  };
 };
 
 var cStyle = "\n  background-color: dodgerblue; \n  color: white;\n  padding: 0 .5rem;\n  border-radius: 3px;\n"; // eslint-disable-next-line
@@ -251,7 +233,6 @@ var cStyle = "\n  background-color: dodgerblue; \n  color: white;\n  padding: 0 
 var isDevelopment = function isDevelopment() {
   return process.env.NODE_ENV === 'development';
 };
-
 var logError = function logError(err) {
   // eslint-disable-next-line
   if (process.browser) console.error(err);
@@ -297,6 +278,326 @@ var startStop = function startStop() {
     reset();
     return countBeforeReset;
   }];
+};
+
+var metaLen = ramda.lensPath(["meta"]);
+var itemsLen = ramda.lensPath(["items"]);
+
+var _isLastPage = function isLastPage(pager) {
+  return pager.meta.currentPage === pager.meta.totalPages;
+};
+
+var isBeforeLastPage = function isBeforeLastPage(_ref) {
+  var meta = _ref.meta;
+  return meta.currentPage < meta.totalPages;
+};
+
+var isFirstFetch = ramda.compose(ramda.equals(0), ramda.path(["meta", "currentPage"]));
+var setCurrentPage = ramda.set(ramda.lensPath(["meta", "currentPage"]));
+
+var setTotals = function setTotals(obj) {
+  return function (pager) {
+    if (isFirstFetch(pager)) {
+      var pickTotals = ramda.pick(["totalPages", "totalItems"]);
+      var value = ramda.merge(pickTotals(obj), ramda.view(metaLen, pager));
+      return ramda.set(metaLen, value, pager);
+    }
+
+    return pager;
+  };
+};
+
+var setChunk = function setChunk(page, items, pager) {
+  var chunkMap = ramda.view(itemsLen, pager);
+  return ramda.set(itemsLen, chunkMap.set(page, items));
+};
+
+var handlerFns = {
+  onFail: function onFail(err) {
+    return console.error(err);
+  },
+  onSuccess: function onSuccess(x) {
+    return x;
+  },
+  extractMeta: function extractMeta(x) {
+    return x;
+  },
+  getCurrentItems: function getCurrentItems() {
+    return this.items.get(this.meta.currentPage);
+  },
+  isLastPage: function isLastPage() {
+    return _isLastPage(this);
+  }
+};
+var meta = {
+  limit: 30,
+  totalPages: 1,
+  totalItems: 1,
+  currentPage: 0
+};
+var Pager = function Pager(obj) {
+  return _objectSpread2({
+    __proto__: handlerFns,
+    endpoint: Promise.resolve(),
+    items: new Map([]),
+    name: "Pager"
+  }, obj, {
+    meta: _objectSpread2({
+      __proto__: meta
+    }, obj.meta)
+  });
+}; //  page
+
+var guessPage = function guessPage(context, action) {
+  var page = context.meta.currentPage;
+
+  if (action === "INCREMENT") {
+    if (isFirstFetch(context) || isBeforeLastPage(context)) {
+      return page + 1;
+    }
+  }
+
+  if (action === "DECREMENT" && page > 1) {
+    return page - 1;
+  }
+
+  return page;
+};
+
+var fetchData =
+/*#__PURE__*/
+function () {
+  var _ref2 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee(pager, page) {
+    var endpoint, limit, data, newPager;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            endpoint = pager.endpoint, limit = pager.meta.limit;
+            _context.prev = 1;
+            _context.next = 4;
+            return endpoint({
+              page: page,
+              limit: limit
+            });
+
+          case 4:
+            data = _context.sent;
+            newPager = ramda.compose(Pager, setChunk(page, pager.onSuccess(data), pager), setCurrentPage(page), ramda.compose(setTotals, pager.extractMeta)(data));
+            return _context.abrupt("return", newPager(pager));
+
+          case 9:
+            _context.prev = 9;
+            _context.t0 = _context["catch"](1);
+            pager.onError(_context.t0);
+
+          case 12:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, null, [[1, 9]]);
+  }));
+
+  return function fetchData(_x, _x2) {
+    return _ref2.apply(this, arguments);
+  };
+}(); // executes an action
+
+var commit = function commit(action) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref3 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(pager) {
+        var page, _pager;
+
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                page = guessPage(pager, action);
+
+                if (!(action === "UPDATE")) {
+                  _context2.next = 4;
+                  break;
+                }
+
+                _pager = ramda.set(itemsLen, new Map([]), pager);
+                return _context2.abrupt("return", fetchData(_pager, 1));
+
+              case 4:
+                if (!(pager.items.has(page) && action !== "REFRESH")) {
+                  _context2.next = 6;
+                  break;
+                }
+
+                return _context2.abrupt("return", setCurrentPage(page, pager));
+
+              case 6:
+                _context2.next = 8;
+                return fetchData(pager, page);
+
+              case 8:
+                return _context2.abrupt("return", _context2.sent);
+
+              case 9:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }));
+
+      return function (_x3) {
+        return _ref3.apply(this, arguments);
+      };
+    }()
+  );
+};
+
+var refresh = commit("UPDATE");
+
+var _next = commit("INCREMENT");
+
+var _prev = commit("DECREMENT"); // Vuex Helpers
+
+var setItems = function setItems(commit) {
+  return function (paginator) {
+    var itemGroup = log(paginator.getCurrentItems(), "Fetched " + paginator.name);
+    commit("set_paginator", paginator);
+    commit("set_items", itemGroup);
+    return itemGroup;
+  };
+};
+
+var mapPaginationActions = function mapPaginationActions() {
+  return {
+    fetch: function () {
+      var _fetch = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee3(_ref4) {
+        var state, commit;
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                state = _ref4.state, commit = _ref4.commit;
+                return _context3.abrupt("return", _next(state.paginator).then(setItems(commit)));
+
+              case 2:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }));
+
+      function fetch(_x4) {
+        return _fetch.apply(this, arguments);
+      }
+
+      return fetch;
+    }(),
+    next: function () {
+      var _next2 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee4(_ref5) {
+        var state, commit;
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                state = _ref5.state, commit = _ref5.commit;
+                return _context4.abrupt("return", _next(state.paginator).then(setItems(commit)));
+
+              case 2:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4);
+      }));
+
+      function next(_x5) {
+        return _next2.apply(this, arguments);
+      }
+
+      return next;
+    }(),
+    prev: function () {
+      var _prev2 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee5(_ref6) {
+        var state, commit;
+        return regeneratorRuntime.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                state = _ref6.state, commit = _ref6.commit;
+                return _context5.abrupt("return", _prev(state.paginator).then(setItems(commit)));
+
+              case 2:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5);
+      }));
+
+      function prev(_x6) {
+        return _prev2.apply(this, arguments);
+      }
+
+      return prev;
+    }(),
+    update: function () {
+      var _update = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee6(_ref7) {
+        var state, commit;
+        return regeneratorRuntime.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                state = _ref7.state, commit = _ref7.commit;
+                return _context6.abrupt("return", refresh(state.paginator).then(setItems(commit)));
+
+              case 2:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6);
+      }));
+
+      function update(_x7) {
+        return _update.apply(this, arguments);
+      }
+
+      return update;
+    }()
+  };
+};
+/**
+ * Polls the paginator by interval
+ * @param  {Function} paginator   The paginator
+ * @param  {Function} setter   Update callback
+ * @param  {Integer} duration Poll interval
+ * @return {Function}  to stop the poll
+ */
+
+var poll = function poll(paginator, setter) {
+  var duration = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 15000;
+  var handle = setInterval(function () {
+    return paginator.update().then(setter);
+  }, duration);
+  return function () {
+    clearInterval(handle);
+  };
 };
 
 require('intl');
@@ -455,8 +756,30 @@ var onBackspace = function onBackspace(fn) {
   };
 };
 
+/**
+ * Transform an Object to FormData
+ * @param  {Object} formObj The Object
+ * @return {FormData}
+ */
+
+var makeFormData = function makeFormData(formObj) {
+  if (!isBrowser()) throw Error("`makeFormData` works only in browser enviroment.");
+  var form = new FormData();
+
+  for (var _i = 0, _Object$entries = Object.entries(formObj); _i < _Object$entries.length; _i++) {
+    var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
+        key = _Object$entries$_i[0],
+        value = _Object$entries$_i[1];
+
+    form.append(key, value);
+  }
+
+  return form;
+};
+
 exports.Checkable = Checkable;
 exports.Editable = Editable;
+exports.Pager = Pager;
 exports.Visibility = Visibility;
 exports.buildFromProto = buildFromProto;
 exports.compose = compose;
@@ -464,20 +787,28 @@ exports.currency = currency;
 exports.debug = debug;
 exports.delay = delay;
 exports.euro = euro;
+exports.fetchData = fetchData;
 exports.filterKeys = filterKeys;
 exports.hasPrice = hasPrice;
 exports.hasProp = hasProp;
+exports.isBrowser = isBrowser;
+exports.isDevelopment = isDevelopment;
 exports.isEmail = isEmail;
 exports.isImage = isImage;
 exports.log = log;
 exports.logError = logError;
+exports.makeFormData = makeFormData;
 exports.makeSlug = makeSlug;
+exports.mapPaginationActions = mapPaginationActions;
 exports.naira = naira;
+exports.next = _next;
 exports.numberFormat = numberFormat;
 exports.onBackspace = onBackspace;
 exports.onEnter = onEnter;
 exports.pipe = pipe;
 exports.poll = poll;
+exports.prev = _prev;
+exports.refresh = refresh;
 exports.slugify = slugify;
 exports.startStop = startStop;
 exports.sumArray = sumArray;

@@ -6,7 +6,7 @@ const cStyle = `
 `
 
 // eslint-disable-next-line
-const isDevelopment = () => process.env.NODE_ENV === 'development';
+export const isDevelopment = () => process.env.NODE_ENV === 'development';
 
 export const logError = err => {
   // eslint-disable-next-line

@@ -1,3 +1,5 @@
+export const isBrowser = new Function("try {return this===window;}catch(e){ return false;}");
+
 export const slugify = text => {
   const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôœṕŕßśșțùúüûǘẃẍÿź·/_,:;';
   const b = 'aaaaaaaaceeeeghiiiimnnnoooooprssstuuuuuwxyz------';
