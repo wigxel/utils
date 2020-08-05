@@ -4,6 +4,10 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
+var _slicedToArray = _interopDefault(require('@babel/runtime/helpers/slicedToArray'));
+var _regeneratorRuntime = _interopDefault(require('@babel/runtime/regenerator'));
+var _asyncToGenerator = _interopDefault(require('@babel/runtime/helpers/asyncToGenerator'));
+var _defineProperty = _interopDefault(require('@babel/runtime/helpers/defineProperty'));
 var ramda = require('ramda');
 var _ = _interopDefault(require('lodash'));
 
@@ -16,133 +20,6 @@ var iterate = function iterate(fn) {
 var sumArray = function sumArray(arr, fn) {
   return arr.reduce(iterate(fn), 0);
 };
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-        args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-
-      _next(undefined);
-    });
-  };
-}
-
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-}
-
-function ownKeys(object, enumerableOnly) {
-  var keys = Object.keys(object);
-
-  if (Object.getOwnPropertySymbols) {
-    var symbols = Object.getOwnPropertySymbols(object);
-    if (enumerableOnly) symbols = symbols.filter(function (sym) {
-      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-    });
-    keys.push.apply(keys, symbols);
-  }
-
-  return keys;
-}
-
-function _objectSpread2(target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i] != null ? arguments[i] : {};
-
-    if (i % 2) {
-      ownKeys(source, true).forEach(function (key) {
-        _defineProperty(target, key, source[key]);
-      });
-    } else if (Object.getOwnPropertyDescriptors) {
-      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-    } else {
-      ownKeys(source).forEach(function (key) {
-        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-      });
-    }
-  }
-
-  return target;
-}
-
-function _slicedToArray(arr, i) {
-  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
-}
-
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-
-function _iterableToArrayLimit(arr, i) {
-  if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
-    return;
-  }
-
-  var _arr = [];
-  var _n = true;
-  var _d = false;
-  var _e = undefined;
-
-  try {
-    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-      _arr.push(_s.value);
-
-      if (i && _arr.length === i) break;
-    }
-  } catch (err) {
-    _d = true;
-    _e = err;
-  } finally {
-    try {
-      if (!_n && _i["return"] != null) _i["return"]();
-    } finally {
-      if (_d) throw _e;
-    }
-  }
-
-  return _arr;
-}
-
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance");
-}
 
 var isBrowser = new Function("try {return this===window;}catch(e){ return false;}");
 var slugify = function slugify(text) {
@@ -280,6 +157,9 @@ var startStop = function startStop() {
   }];
 };
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 var metaLen = ramda.lensPath(["meta"]);
 var itemsLen = ramda.lensPath(["items"]);
 
@@ -336,13 +216,13 @@ var meta = {
   currentPage: 0
 };
 var Pager = function Pager(obj) {
-  return _objectSpread2({
+  return _objectSpread({
     __proto__: handlerFns,
     endpoint: Promise.resolve(),
     items: new Map([]),
     name: "Pager"
   }, obj, {
-    meta: _objectSpread2({
+    meta: _objectSpread({
       __proto__: meta
     }, obj.meta)
   });
@@ -369,9 +249,9 @@ var fetchData =
 function () {
   var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(pager, page) {
+  _regeneratorRuntime.mark(function _callee(pager, page) {
     var endpoint, limit, data, newPager;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
+    return _regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
@@ -412,10 +292,10 @@ var commit = function commit(action) {
     function () {
       var _ref3 = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee2(pager) {
+      _regeneratorRuntime.mark(function _callee2(pager) {
         var page, _pager;
 
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        return _regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
@@ -479,9 +359,9 @@ var mapPaginationActions = function mapPaginationActions() {
     fetch: function () {
       var _fetch = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee3(_ref4) {
+      _regeneratorRuntime.mark(function _callee3(_ref4) {
         var state, commit;
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+        return _regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
@@ -505,9 +385,9 @@ var mapPaginationActions = function mapPaginationActions() {
     next: function () {
       var _next2 = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee4(_ref5) {
+      _regeneratorRuntime.mark(function _callee4(_ref5) {
         var state, commit;
-        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+        return _regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
@@ -531,9 +411,9 @@ var mapPaginationActions = function mapPaginationActions() {
     prev: function () {
       var _prev2 = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee5(_ref6) {
+      _regeneratorRuntime.mark(function _callee5(_ref6) {
         var state, commit;
-        return regeneratorRuntime.wrap(function _callee5$(_context5) {
+        return _regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
@@ -557,9 +437,9 @@ var mapPaginationActions = function mapPaginationActions() {
     update: function () {
       var _update = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee6(_ref7) {
+      _regeneratorRuntime.mark(function _callee6(_ref7) {
         var state, commit;
-        return regeneratorRuntime.wrap(function _callee6$(_context6) {
+        return _regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
@@ -600,6 +480,10 @@ var poll = function poll(paginator, setter) {
   };
 };
 
+function ownKeys$1(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$1(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$1(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
 require('intl');
 
 require("intl/locale-data/jsonp/en");
@@ -613,7 +497,7 @@ var currency = function currency() {
   var lang = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'en-US';
   return function () {
     var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    return new Intl.NumberFormat(lang, _objectSpread2({}, defaultConfig, {}, config)).format;
+    return new Intl.NumberFormat(lang, _objectSpread$1({}, defaultConfig, {}, config)).format;
   };
 };
 var numberFormat = currency('en-US')({
@@ -628,6 +512,10 @@ var euro = currency('en-US')({
 var naira = currency('en-US')({
   currency: 'NGN'
 });
+
+function ownKeys$2(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$2(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$2(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 var ProtoBuilderError = function ProtoBuilderError(msg) {
   return new Error("ProtoBuildError: " + msg);
@@ -671,7 +559,7 @@ var doToggle = function doToggle(prop) {
 };
 
 var Visibility = checkDefault(function (data) {
-  return _objectSpread2({
+  return _objectSpread$2({
     visible: true,
     toggleVisibility: doToggle('visible')
   }, data);
@@ -688,7 +576,7 @@ var checkForPrice = function checkForPrice(data) {
 };
 
 var hasPrice = pipe(notNull, onlyObject, checkForPrice, function (data) {
-  return _objectSpread2({}, data, {
+  return _objectSpread$2({}, data, {
     _getPrice: function _getPrice() {
       var precision = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
       return _.round(_.toNumber(this.getPrice()), precision);
@@ -699,13 +587,13 @@ var hasPrice = pipe(notNull, onlyObject, checkForPrice, function (data) {
   });
 });
 var Checkable = checkDefault(function (data) {
-  return _objectSpread2({
+  return _objectSpread$2({
     checked: false,
     toggleCheck: doToggle('checked')
   }, data);
 });
 var Editable = checkDefault(function (data) {
-  return _objectSpread2({
+  return _objectSpread$2({
     edit: false,
     toggleEdit: doToggle('edit')
   }, data);

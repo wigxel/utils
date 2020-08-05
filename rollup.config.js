@@ -10,6 +10,7 @@ export default {
   external: ['lodash'],
   plugins: [
     babel({
+    	runtimeHelpers: true,
       exclude: "node_modules/**"
     }),
     resolve(),
